@@ -1,39 +1,39 @@
 # Evently
 
-منصة متكاملة للإعلان عن الفعاليات، نشرها، والبحث عنها، وحجز/شراء تذاكرها. تدعم اللغتين العربية والإنجليزية (RTL/LTR).
+A full-stack platform for advertising, publishing, searching, and booking/buying tickets for events. Supports both Arabic and English (RTL/LTR).
 
-## البنية التقنية
+## Tech Stack
 
-- **الواجهة الخلفية**: ASP.NET Core 10 Web API + Entity Framework Core + PostgreSQL + JWT Auth + Stripe
-- **الواجهة الأمامية**: React 19 + TypeScript + Vite + Tailwind CSS + react-i18next
+- **Backend**: ASP.NET Core 10 Web API + Entity Framework Core + PostgreSQL + JWT Auth + Stripe
+- **Frontend**: React 19 + TypeScript + Vite + Tailwind CSS + react-i18next
 
-## المميزات
+## Features
 
-- تسجيل حساب / تسجيل دخول (JWT)
-- نشر فعالية جديدة (عنوان، وصف، تصنيف، موقع، تواريخ، سعر، عدد التذاكر، صورة)
-- تعديل وحذف الفعاليات التي نشرها المستخدم فقط (صلاحيات على مستوى الـ API)
-- بحث وفلترة كاملة (نص حر، تصنيف، موقع، نطاق تاريخ، نطاق سعر، ترتيب)
-- حجز الفعاليات المجانية مباشرة، ودفع الفعاليات المدفوعة عبر Stripe Checkout (وضع اختبار)
-- إلغاء الحجز مع استرجاع التذاكر تلقائياً
-- صفحة "فعالياتي" لإدارة الفعاليات المنشورة، وصفحة "تذاكري" لعرض الحجوزات
-- لوحة تحكم Admin: إحصائيات عامة، وإدارة كل الفعاليات/المستخدمين/الحجوزات
-- تبديل فوري بين العربية والإنجليزية مع تغيير اتجاه الصفحة RTL/LTR
+- User registration / login (JWT)
+- Publish a new event (title, description, category, location, dates, price, ticket count, image)
+- Edit and delete only the events you published (enforced at the API level)
+- Full search and filtering (free text, category, location, date range, price range, sorting)
+- Instant booking for free events, and Stripe Checkout payment for paid events (test mode)
+- Cancel a booking, with tickets automatically returned to inventory
+- "My Events" page to manage your published events, and "My Tickets" page for your bookings
+- Admin dashboard: overall stats, and management of all events/users/bookings
+- Instant switch between Arabic and English, with automatic RTL/LTR layout change
 
-## التشغيل محلياً
+## Running Locally
 
-### المتطلبات
+### Requirements
 - .NET SDK 10
 - Node.js 20+
-- PostgreSQL (تم اختباره على PostgreSQL 17)
-- حساب Stripe مجاني (وضع الاختبار) إن رغبت بتفعيل الدفع الفعلي
+- PostgreSQL (tested on PostgreSQL 17)
+- A free Stripe account (test mode) if you want real payment checkout enabled
 
-### 1) الواجهة الخلفية
+### 1) Backend
 
 ```bash
 cd server/Evently.Api
 ```
 
-أنشئ ملف `appsettings.Development.json` (هذا الملف مُستثنى من git عبر `.gitignore` لحماية أسرارك) بالشكل التالي:
+Create an `appsettings.Development.json` file (this file is excluded from git via `.gitignore` to protect your secrets) with the following shape:
 
 ```json
 {
@@ -54,18 +54,18 @@ cd server/Evently.Api
 }
 ```
 
-مفاتيح Stripe التجريبية مجانية من [dashboard.stripe.com/test/apikeys](https://dashboard.stripe.com/test/apikeys). إن تركتها فارغة، يعمل الموقع بشكل طبيعي وتبقى الفعاليات المدفوعة فقط معطّلة الحجز.
+Stripe test keys are free from [dashboard.stripe.com/test/apikeys](https://dashboard.stripe.com/test/apikeys). If left empty, the site still works normally — only checkout for paid events will be disabled.
 
-ثم شغّل:
+Then run:
 
 ```bash
 dotnet ef database update
 dotnet run --launch-profile http
 ```
 
-عند أول تشغيل يتم زرع حساب مدير (`admin@evently.com` / `Admin@123`) و20 فعالية تجريبية تلقائياً. الـ API يعمل افتراضياً على `http://localhost:5292`، وتوثيق Swagger متاح على `/swagger` في بيئة التطوير.
+On first run, an admin account (`admin@evently.com` / `Admin@123`) and 20 demo events are seeded automatically. The API runs on `http://localhost:5292` by default, with Swagger docs available at `/swagger` in development.
 
-### 2) الواجهة الأمامية
+### 2) Frontend
 
 ```bash
 cd client
@@ -73,12 +73,12 @@ npm install
 npm run dev
 ```
 
-الموقع يعمل على `http://localhost:5173`.
+The site runs on `http://localhost:5173`.
 
-> إذا اخترت تشغيل الـ API على منفذ مختلف، حدّث `VITE_API_URL` في ملف `.env` داخل مجلد `client`، أو عدّل القيمة الافتراضية في `src/lib/api.ts`.
+> If you run the API on a different port, update `VITE_API_URL` in a `.env` file inside the `client` folder, or change the default value in `src/lib/api.ts`.
 
-## ملاحظات أمان قبل النشر للإنتاج
+## Security Notes Before Deploying to Production
 
-- غيّر `Jwt:Key` إلى مفتاح سري جديد ولا تشاركه، واستبدل مفاتيح Stripe التجريبية بمفاتيح الإنتاج الحقيقية عبر متغيرات بيئة أو Secret Manager (وليس داخل أي ملف appsettings مرفوع لأي مكان).
-- غيّر كلمة مرور حساب المدير الافتراضي فور أول تسجيل دخول.
-- فعّل HTTPS وقيّد CORS على نطاق الإنتاج الفعلي بدلاً من `localhost`.
+- Change `Jwt:Key` to a new secret and never share it, and replace the Stripe test keys with real production keys via environment variables or a secret manager (never inside any appsettings file that gets pushed anywhere).
+- Change the default admin account password immediately after first login.
+- Enable HTTPS and restrict CORS to your actual production domain instead of `localhost`.
