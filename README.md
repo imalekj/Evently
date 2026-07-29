@@ -2,6 +2,14 @@
 
 A full-stack platform for advertising, publishing, searching, and booking/buying tickets for events. Supports both Arabic and English (RTL/LTR).
 
+## Live Deployment
+
+- **Frontend (Vercel)**: https://evently-one-kappa.vercel.app
+- **API (Render)**: https://evently-api-43gj.onrender.com
+- **Database**: Neon Postgres (serverless)
+
+The API is on Render's free tier, which spins down after periods of inactivity — the first request after a while may take ~30-60s to wake it back up.
+
 ## Tech Stack
 
 - **Backend**: ASP.NET Core 10 Web API + Entity Framework Core + PostgreSQL + JWT Auth + Stripe
@@ -76,6 +84,14 @@ npm run dev
 The site runs on `http://localhost:5173`.
 
 > If you run the API on a different port, update `VITE_API_URL` in a `.env` file inside the `client` folder, or change the default value in `src/lib/api.ts`.
+
+## Deploying
+
+The API deploys as a Docker container (`server/Evently.Api/Dockerfile`) and reads all configuration from environment variables (`ConnectionStrings__Default`, `Jwt__Key`, `Jwt__Issuer`, `Jwt__Audience`, `Jwt__ExpiryMinutes`, `Stripe__SecretKey`, `Stripe__PublishableKey`, `Stripe__ClientUrl`, `Cors__AllowedOrigins`) — set these in your hosting provider's dashboard rather than committing them. It also binds to the `PORT` env var when set, so it works out of the box on Render, Fly.io, Railway, etc.
+
+The frontend is a static Vite build; `client/vercel.json` adds the SPA rewrite Vercel needs so client-side routes (e.g. `/login`) don't 404 on direct navigation. Set `VITE_API_URL` to your deployed API's URL at build time.
+
+After changing the frontend's URL, update the API's `Cors__AllowedOrigins` (and `Stripe__ClientUrl`) to match, and redeploy the API — CORS rejects any origin not in that list.
 
 ## Security Notes Before Deploying to Production
 
